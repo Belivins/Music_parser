@@ -1,22 +1,21 @@
-import 'dart:ui' as ui;
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:test_projects/Music/AudioHandler.dart';
-import 'package:test_projects/Widgets/CustomSliverList.dart';
-import 'package:test_projects/Widgets/CustomSliverList.dart';
+import 'package:test_projects/Network/MusicBox.dart';
 import 'package:test_projects/Widgets/MusicBar/ControlButtons.dart';
-import 'package:test_projects/Widgets/MusicBar/CustomMusicBottomBar.dart';
 import 'package:test_projects/Widgets/MusicBar/CustomSeekBar.dart';
 import 'package:test_projects/main.dart';
 
 class CustomModalBottomSheet extends StatefulWidget{
 
   final AudioPlayerHandler audioHandler;
+  final void Function(dynamic value)  updateMusicList;
+  final MusicBox userMusic;
 
-  const CustomModalBottomSheet(this.audioHandler, {Key? key}) : super(key: key);
+  const CustomModalBottomSheet({Key? key, required this.userMusic, required this.updateMusicList, required this.audioHandler}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _CustomModalBottomSheet();
@@ -54,7 +53,8 @@ class _CustomModalBottomSheet extends State<CustomModalBottomSheet> {
                     height: MediaQuery.of(context).size.height,
                     width: MediaQuery.of(context).size.width,
                     decoration: BoxDecoration(
-                        color: Colors.white10.withOpacity(0.8),
+                        // color: Colors.white10.withOpacity(0.8),
+                        color: Colors.white,
                         border: Border.all(
                           width: 0,
                           color: Colors.grey,
@@ -63,8 +63,8 @@ class _CustomModalBottomSheet extends State<CustomModalBottomSheet> {
                     ),
                     child: PageView(
                       children: [
-                        MusicBarWidget(audioHandler: widget.audioHandler, positionData: positionData),
-                        SmallPlaylistWidget(audioHandler: widget.audioHandler),
+                        MusicBarWidget(audioHandler: widget.audioHandler, positionData: positionData, widget.updateMusicList),
+                        SmallPlaylistWidget(audioHandler: widget.audioHandler, userMusic: widget.userMusic,),
                       ],
                     ),
                   );
@@ -77,11 +77,12 @@ class _CustomModalBottomSheet extends State<CustomModalBottomSheet> {
 }
 
 class MusicBarWidget extends StatefulWidget{
-  const MusicBarWidget({Key? key, required this.audioHandler,required this.positionData}) : super(key: key);
+  const MusicBarWidget(this.updateMusicList, {Key? key, required this.audioHandler,required this.positionData}) : super(key: key);
 
   final AudioPlayerHandler audioHandler;
   final PositionData? positionData;
-  
+  final void Function(dynamic value)  updateMusicList;
+
   @override
   State<StatefulWidget> createState()  => _MusicBarWidget();
 
@@ -97,6 +98,19 @@ class _MusicBarWidget extends State<MusicBarWidget> {
       child: Column(
         mainAxisSize: MainAxisSize.max,
         children: [
+          Container(
+            margin: EdgeInsets.symmetric(vertical: 5),
+            height: MediaQuery.of(context).size.height * 0.01,
+            width: MediaQuery.of(context).size.height * 0.1,
+            decoration: BoxDecoration(
+              color: Colors.grey,
+              borderRadius: BorderRadius.all(Radius.circular(5)),
+            ),
+
+            child: GestureDetector(
+              onTap: () {Navigator.pop(context);},
+            ),
+          ),
           Container(
             height: MediaQuery.of(context).size.height / 2 - 40,
             width: MediaQuery.of(context).size.height * 0.8 / 2,
@@ -122,13 +136,11 @@ class _MusicBarWidget extends State<MusicBarWidget> {
           ),
           GestureDetector(
             onTap: () {
-              setState((){
+              setState(() {
                 var value = widget.audioHandler.mediaItem.value!.artist!;
-                myVoidCallback(value);
-                // isOpen_ModalBottomSheet = false;
+                widget.updateMusicList(value);
+                Navigator.pop(context);
               });
-              // CurrentPage = 1;
-              // Navigator.pushReplacementNamed(context, "audio list");
             },
             child: Text(widget.audioHandler.mediaItem.value!.artist!, style: TextStyle(color: Colors.blue),),
           ),
@@ -153,9 +165,10 @@ class _MusicBarWidget extends State<MusicBarWidget> {
 }
 
 class SmallPlaylistWidget extends StatefulWidget{
-  const SmallPlaylistWidget({Key? key, required this.audioHandler}) : super(key: key);
+  const SmallPlaylistWidget({Key? key, required this.audioHandler, required this.userMusic}) : super(key: key);
 
   final AudioPlayerHandler audioHandler;
+  final MusicBox userMusic;
 
   @override
   State<StatefulWidget> createState()  => _SmallPlaylistWidget();
@@ -166,21 +179,21 @@ class _SmallPlaylistWidget extends State<SmallPlaylistWidget> {
 
   onTapped(int index){
     // isOpen_ModalBottomSheet = true;
-    if(currentIndex != index) {
+    if(widget.userMusic.currentIndex != index) {
       CurrentPlay(index);
     }
     setState(() {
-      if (widget.audioHandler.playbackState.value.playing != true || index != currentIndex) {
+      if (widget.audioHandler.playbackState.value.playing != true || index != widget.userMusic.currentIndex) {
         widget.audioHandler.play();
         print(widget.audioHandler.mediaItem.value!.id);
       } else if (widget.audioHandler.playbackState.value.processingState != ProcessingState.completed &&
-          index == currentIndex) {
+          index == widget.userMusic.currentIndex) {
         widget.audioHandler.pause();
       } else {
         widget.audioHandler.seek(Duration.zero);
       }
       // isVisible = true;
-      currentIndex = index;
+      widget.userMusic.currentIndex = index;
     });
   }
 
@@ -199,16 +212,16 @@ class _SmallPlaylistWidget extends State<SmallPlaylistWidget> {
               setState(() {
                 if (oldIndex < newIndex) newIndex--;
                 // widget.audioHandler.moveQueueItem(oldIndex, newIndex);
-                var music = smallPlaylist[oldIndex];
-                smallPlaylist.remove(smallPlaylist[oldIndex]);
-                smallPlaylist.insert(newIndex, music);
+                var music = widget.userMusic.smallPlaylist[oldIndex];
+                widget.userMusic.smallPlaylist.remove(widget.userMusic.smallPlaylist[oldIndex]);
+                widget.userMusic.smallPlaylist.insert(newIndex, music);
               });
             },
-            itemCount: smallPlaylist.length,
+            itemCount: widget.userMusic.smallPlaylist.length,
             itemBuilder: (BuildContext context, int index) {
               return Card(
                 key: ValueKey(index),
-                color: index == currentIndex ? Colors.grey.shade300 : null,
+                color: index == widget.userMusic.currentIndex ? Colors.grey.shade300 : null,
                 child: Container(
                   alignment: Alignment.centerLeft,
                   height: 50,
@@ -237,14 +250,14 @@ class _SmallPlaylistWidget extends State<SmallPlaylistWidget> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  smallPlaylist[index].name!.trim(),
+                                  widget.userMusic.smallPlaylist[index].name!.trim(),
                                   textAlign: TextAlign.left,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(fontSize: 16),
                                 ),
                                 Text(
-                                  smallPlaylist[index].author!.trim(),
+                                  widget.userMusic.smallPlaylist[index].author!.trim(),
                                   // textAlign: TextAlign.left,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,

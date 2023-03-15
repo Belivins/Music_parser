@@ -3,30 +3,15 @@ import 'package:audio_service/audio_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:test_projects/Music/AudioHandler.dart';
-import 'package:test_projects/Pages/AlbumsList.dart';
+import 'package:test_projects/Network/MusicBox.dart';
+import 'package:test_projects/Pages/AlbumsScreen.dart';
 import 'package:test_projects/Pages/FirstPage.dart';
-import 'package:test_projects/Pages/MainScreen.dart';
-import 'package:test_projects/Widgets/ExpandedBottomBar/ExpandedBottomBarController.dart';
-import 'package:test_projects/Music/music.dart';
-import 'package:test_projects/Network/network.dart';
+import 'package:test_projects/Pages/MusicScreen.dart';
 
 // You might want to provide this using dependency injection rather than a
 // global variable.
 late AudioPlayerHandler _audioHandler;
-late List<Music> allMusic;
-List<Music> findMusic = [];
-List<Music> smallPlaylist = List.from(findMusic);
-int currentIndex = -1;
 int CurrentPage = -1;
-
-updateMusicList(List<Music> newMusic){
-  allMusic = music_list;
-  findMusic = music_list;
-}
-
-getMusicList(){
-  return findMusic;
-}
 
 Future<void> main() async {
   _audioHandler = await AudioService.init(
@@ -47,7 +32,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
+    MusicBox userMusic = MusicBox();
     return MaterialApp(
       title: 'Audio Service Demo',
       theme: ThemeData(primarySwatch: Colors.blue),
@@ -55,10 +40,10 @@ class MyApp extends StatelessWidget {
       //   child: MainScreen(_audioHandler),
       // ),
       // home: const MainScreen(),
-      home: FirstPage(audioHandler: _audioHandler),
+      home: FirstPage(audioHandler: _audioHandler, userMusic: userMusic,),
       routes: {
-        "audio list":(context)=>MainScreen(_audioHandler),
-        "albums list":(context)=>AlbumScreen(_audioHandler),
+        "audio list":(context)=>MusicScreen(audioHandler: _audioHandler, userMusic: userMusic,),
+        "albums list":(context)=>AlbumScreen(audioHandler: _audioHandler, userMusic: userMusic,),
       },
     );
   }

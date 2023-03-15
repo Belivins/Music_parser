@@ -1,24 +1,19 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:test_projects/Music/AudioHandler.dart';
-import 'package:test_projects/Music/music.dart';
-import 'package:test_projects/Pages/MainScreen.dart';
-import 'package:test_projects/Widgets/CustomSliverList.dart';
-import 'package:test_projects/Widgets/MusicBar/ControlButtons.dart';
-import 'package:test_projects/Widgets/MusicBar/CustomSeekBar.dart';
-import 'package:test_projects/Widgets/ShowModalBottomSheet.dart';
+import 'package:test_projects/Network/MusicBox.dart';
+import 'package:test_projects/Widgets/MusicBar/ShowModalBottomSheet.dart';
 import 'package:test_projects/main.dart';
-
-bool isOpen_ModalBottomSheet = false;
-bool isOpen_BottomBar = true;
 
 class MusicBottomBar extends StatefulWidget{
 
   final AudioPlayerHandler audioHandler;
+  final void Function(dynamic value) updateMusicList;
+  final MusicBox userMusic;
 
-  const MusicBottomBar(this.audioHandler, {Key? key}) : super(key: key);
+
+  const MusicBottomBar(this.updateMusicList, {Key? key, required this.userMusic, required this.audioHandler}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _MusicBottomBar();
@@ -27,183 +22,162 @@ class MusicBottomBar extends StatefulWidget{
 class _MusicBottomBar extends State<MusicBottomBar> {
 
   void _showModalBottomSheet() {
-    setState(() {
-      // isOpen_ModalBottomSheet = (currentIndex == -1) ? true : false;
-      isOpen_ModalBottomSheet = !isOpen_ModalBottomSheet;
-      isOpen_BottomBar = !isOpen_BottomBar;
-    });
-
-    // showModalBottomSheet<void>();
     Future<void> future = showModalBottomSheet<void>(
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
         context: context,
         builder: (BuildContext context) {
-          return CustomModalBottomSheet(widget.audioHandler);
+          return CustomModalBottomSheet(userMusic: widget.userMusic, audioHandler: widget.audioHandler, updateMusicList: widget.updateMusicList,);
         }
     );
-    future.then((void value) => setState(() {
-      isOpen_ModalBottomSheet = !isOpen_ModalBottomSheet;
-      isOpen_BottomBar = !isOpen_BottomBar;
-    }));
   }
-
 
   @override
   Widget build(BuildContext context) {
-      return Positioned(
-        bottom: 0,
-        child: Column(
-          children: [
-            StreamBuilder<QueueState>(
-              stream: widget.audioHandler.queueState,
-              builder: (context, snapshot) {
-                final queueState = snapshot.data ?? QueueState.empty;
-                return         Visibility(
-                    visible: isOpen_ModalBottomSheet,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white12.withOpacity(0.9),
-                        border: Border(
-                          top: BorderSide(
-                            color: Colors.grey.withOpacity(0.9),
-                            width: 1,
-                          ),
-                        ),
-                      ),
-                      alignment: Alignment.center,
-                      width: MediaQuery.of(context).size.width,
-                      height: 50,
-                      // height: 100,
-                      child: InkWell(
-                        onTap: () {
-                          _showModalBottomSheet();
-                        },
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            StreamBuilder<PlaybackState>(
-                              stream: widget.audioHandler.playbackState,
-                              builder: (context, snapshot) {
-                                final playbackState = snapshot.data;
-                                final processingState = playbackState?.processingState;
-                                final playing = playbackState?.playing;
-                                if (processingState == AudioProcessingState.loading ||
-                                    processingState == AudioProcessingState.buffering) {
-                                  return Container(
-                                    margin: const EdgeInsets.all(8.0),
-                                    width: 32.0,
-                                    height: 32.0,
-                                    child: const CircularProgressIndicator(),
-                                  );
-                                } else if (playing != true) {
-                                  return IconButton(
-                                    icon: const Icon(Icons.play_arrow),
-                                    iconSize: 32.0,
-                                    onPressed: widget.audioHandler.play,
-                                  );
-                                } else {
-                                  return IconButton(
-                                    icon: const Icon(Icons.pause),
-                                    iconSize: 32.0,
-                                    onPressed: widget.audioHandler.pause,
-                                  );
-                                }
-                              },
-                            ),
-                            StreamBuilder<QueueState>(
-                              stream: widget.audioHandler.queueState,
-                              builder: (context, snapshot) {
-                                return SizedBox(
-                                  height: 50,
-                                  width: MediaQuery.of(context).size.width - 96,
-                                  child: OverflowBox(
-                                    maxHeight: 50,
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Text(widget.audioHandler.mediaItem.value?.title ?? 'Not found', overflow: TextOverflow.visible, style: TextStyle(fontSize: 14), textAlign: TextAlign.center,),
-                                        Text(widget.audioHandler.mediaItem.value?.artist ?? 'Not found', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12)),
-                                      ],
-                                    ),
-                                  )
-                                );
-                              },
-                            ),
-                            IconButton(
-                                onPressed:() {
-                                  setState(() {
-                                    isOpen_ModalBottomSheet = false;
-                                    widget.audioHandler.stop();
-                                    widget.audioHandler.seek(Duration.zero);
-                                    currentIndex = -1;
-                                    // myVoidCallback('');
-                                  });
-                                },
-                                iconSize: 32.0,
-                                icon: Icon(Icons.close)
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                );
-              },
-            ),
-            Visibility(
-              visible: isOpen_BottomBar,
-              child: Container(
-                width: MediaQuery.of(context).size.width,
-                height: 50,
+    return Positioned(
+      bottom: 0,
+      child: Column(
+        children: [
+          StreamBuilder<QueueState>(
+            stream: widget.audioHandler.queueState,
+            builder: (context, snapshot) {
+              return Container(
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      stops: [0, 0.1, 0.9, 1],
-                      colors: [
-                        Colors.grey.withOpacity(1),
-                        Colors.white10.withOpacity(1),
-                        Colors.white10.withOpacity(1),
-                        Colors.grey.withOpacity(1),
-                      ],
+                  color: Colors.white12.withOpacity(0.9),
+                  border: Border(
+                    top: BorderSide(
+                      color: Colors.grey.withOpacity(0.9),
+                      width: 1,
+                    ),
                   ),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      height: 50,
-                      width: MediaQuery.of(context).size.width / 2,
-                      child: InkWell(
-                        onTap: () {
-                          if (CurrentPage != 1) {
-                            CurrentPage = 1;
-                            Navigator.pushReplacementNamed(context, "audio list");
+                alignment: Alignment.center,
+                width: MediaQuery.of(context).size.width,
+                height: 50,
+                // height: 100,
+                child: InkWell(
+                  onTap: () {
+                    _showModalBottomSheet();
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      StreamBuilder<PlaybackState>(
+                        stream: widget.audioHandler.playbackState,
+                        builder: (context, snapshot) {
+                          final playbackState = snapshot.data;
+                          final processingState = playbackState?.processingState;
+                          final playing = playbackState?.playing;
+                          if (processingState == AudioProcessingState.loading ||
+                              processingState == AudioProcessingState.buffering) {
+                            return Container(
+                              margin: const EdgeInsets.all(8.0),
+                              width: 32.0,
+                              height: 32.0,
+                              child: const CircularProgressIndicator(),
+                            );
+                          } else if (playing != true) {
+                            return IconButton(
+                              icon: const Icon(Icons.play_arrow),
+                              iconSize: 32.0,
+                              onPressed: widget.audioHandler.play,
+                            );
+                          } else {
+                            return IconButton(
+                              icon: const Icon(Icons.pause),
+                              iconSize: 32.0,
+                              onPressed: widget.audioHandler.pause,
+                            );
                           }
                         },
-                        child: Icon(Icons.queue_music,)
                       ),
-                    ),
-                    Container(
-                      height: 50,
-                      width: MediaQuery.of(context).size.width / 2,
-                      child: InkWell(
-                        onTap: (){
-                          if (CurrentPage != 2) {
-                            CurrentPage = 2;
-                            Navigator.pushReplacementNamed(context, "albums list");
-                          }
+                      StreamBuilder<QueueState>(
+                        stream: widget.audioHandler.queueState,
+                        builder: (context, snapshot) {
+                          return SizedBox(
+                            height: 50,
+                            width: MediaQuery.of(context).size.width - 96,
+                            child: OverflowBox(
+                              maxHeight: 50,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(widget.audioHandler.mediaItem.value?.title ?? 'Not found', overflow: TextOverflow.visible, style: TextStyle(fontSize: 14), textAlign: TextAlign.center,),
+                                  Text(widget.audioHandler.mediaItem.value?.artist ?? 'Not found', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12)),
+                                ],
+                              ),
+                            )
+                          );
                         },
-                        child: Icon(Icons.library_music_rounded),
                       ),
-                    )
-                  ],
+                      IconButton(
+                          onPressed:() {
+                            setState(() {
+                              widget.audioHandler.stop();
+                              widget.audioHandler.seek(Duration.zero);
+                              widget.userMusic.currentIndex = -1;
+                            });
+                          },
+                          iconSize: 32.0,
+                          icon: Icon(Icons.close)
+                      ),
+                    ],
+                  ),
                 ),
-              )
-            )
-          ],
-        )
-      );
+              );
+            },
+          ),
+          Container(
+            width: MediaQuery.of(context).size.width,
+            height: 50,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: [0, 0.1, 0.9, 1],
+                  colors: [
+                    Colors.grey.withOpacity(1),
+                    Colors.white10.withOpacity(1),
+                    Colors.white10.withOpacity(1),
+                    Colors.grey.withOpacity(1),
+                  ],
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  height: 50,
+                  width: MediaQuery.of(context).size.width / 2,
+                  child: InkWell(
+                    onTap: () {
+                      if (CurrentPage != 1) {
+                        CurrentPage = 1;
+                        Navigator.pushReplacementNamed(context, "audio list");
+                      }
+                    },
+                    child: Icon(Icons.queue_music,)
+                  ),
+                ),
+                Container(
+                  height: 50,
+                  width: MediaQuery.of(context).size.width / 2,
+                  child: InkWell(
+                    onTap: (){
+                      if (CurrentPage != 2) {
+                        CurrentPage = 2;
+                        Navigator.pushReplacementNamed(context, "albums list");
+                      }
+                    },
+                    child: Icon(Icons.library_music_rounded),
+                  ),
+                )
+              ],
+            ),
+          )
+        ],
+      )
+    );
   }
 }
 //

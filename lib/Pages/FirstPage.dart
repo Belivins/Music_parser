@@ -1,33 +1,17 @@
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:test_projects/Music/AudioHandler.dart';
-import 'package:test_projects/Network/network.dart';
-import 'package:test_projects/Pages/MainScreen.dart';
+import 'package:test_projects/Network/MusicBox.dart';
 import 'package:test_projects/main.dart';
 
 class FirstPage extends StatelessWidget {
-  const FirstPage({Key? key, required this.audioHandler}) : super(key: key);
+  const FirstPage({Key? key, required this.audioHandler, required this.userMusic}) : super(key: key);
 
   final AudioPlayerHandler audioHandler;
+  final MusicBox userMusic;
 
   Send_querry(String vk_link) async {
-    String answ =  await GetBody(vk_link);
-    await updateMusicList(getMusic());
-    List<MediaItem> mediaList = [];
-    for(final music in allMusic){
-      mediaList.add(
-          MediaItem(
-            id: '${getLocalIP()}/music?link=${music.link!}',
-            // id: music.link!,
-            // album: "Science Friday",
-            title: music.name!,
-            artist: music.author!,
-            duration: Duration(minutes: int.parse(music.time!.split(':').first), seconds: int.parse(music.time!.split(':').last)),
-            artUri: Uri.parse('https://media.wnyc.org/i/1400/1400/l/80/1/ScienceFriday_WNYCStudios_1400.jpg'),
-          )
-      );
-    }
-    await audioHandler.updateQueue(mediaList);
+    String answ =  await userMusic.getUserMusic(vk_link);
+    await audioHandler.updateQueue(userMusic.mediaList);
     return answ;
   }
 
