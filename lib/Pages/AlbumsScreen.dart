@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:test_projects/Network/MusicBox.dart';
-import 'package:test_projects/Widgets/MusicBar/CustomMusicBottomBar.dart';
+import 'package:test_projects/Widgets/MusicBar/MusicBottomBar.dart';
 
 import '../Music/AudioHandler.dart';
 

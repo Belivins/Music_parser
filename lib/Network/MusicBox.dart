@@ -5,10 +5,12 @@ import 'package:html/parser.dart' as parser;
 import 'package:http/http.dart' as http;
 import 'package:crypto/crypto.dart';
 import 'package:test_projects/Music/music.dart';
+import 'package:test_projects/Network/ScienceFriday.dart';
 import 'package:test_projects/Network/network.dart';
 
 class MusicBox{
 
+  ScienceFriday sciFri = ScienceFriday();
   Network network = Network();
   List<Music> allMusic = [];
   List<Music> findMusic = [];
@@ -46,4 +48,23 @@ class MusicBox{
     return answer;
   }
 
+  demoMusic() async {
+    String answer = await sciFri.parseSciFriday();
+    await updateMusicList(sciFri.getPodcasts());
+    user_name = 'Демо режим';
+    for(final music in allMusic){
+      mediaList.add(
+          MediaItem(
+            id: music.link!,
+            // id: music.link!, https://s3.amazonaws.com/scifri-segments/scifri202303032.mp3
+            // album: "Science Friday",
+            title: music.name!,
+            artist: music.author!,
+            duration: Duration(minutes: int.parse(music.time!.split(':').first), seconds: int.parse(music.time!.split(':').last)),
+            artUri: Uri.parse(music.image!),
+          )
+      );
+    }
+    return 'Подключено';
+  }
 }

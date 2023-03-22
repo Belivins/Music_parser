@@ -10,7 +10,7 @@ class Music{
   String? link;
   String? image;
 
-  Music(this.author, this.name, this.time, this.link);
+  Music(this.author, this.name, this.time, this.link, [this.image]);
   // Music(String n, String a, String t, String l, [String? img]) {this.name = n;this.author = a;this.time = t;this.time = l;}
 
   void display(){

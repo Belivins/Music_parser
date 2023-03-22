@@ -61,12 +61,30 @@ class _CustomModalBottomSheet extends State<CustomModalBottomSheet> {
                         ),
                         borderRadius: const BorderRadius.vertical(top: Radius.circular(20))
                     ),
-                    child: PageView(
+                    child: Column(
                       children: [
-                        MusicBarWidget(audioHandler: widget.audioHandler, positionData: positionData, widget.updateMusicList),
-                        SmallPlaylistWidget(audioHandler: widget.audioHandler, userMusic: widget.userMusic,),
+                        Container(
+                          margin: EdgeInsets.symmetric(vertical: 5),
+                          height: MediaQuery.of(context).size.height * 0.01,
+                          width: MediaQuery.of(context).size.height * 0.1,
+                          decoration: const BoxDecoration(
+                            color: Colors.grey,
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                          ),
+                          child: GestureDetector(
+                            onTap: () {Navigator.pop(context);},
+                          ),
+                        ),
+                        Expanded(
+                            child: PageView(
+                              children: [
+                                MusicBarWidget(audioHandler: widget.audioHandler, positionData: positionData, widget.updateMusicList),
+                                SmallPlaylistWidget(audioHandler: widget.audioHandler, userMusic: widget.userMusic,),
+                              ],
+                            ),
+                        )
                       ],
-                    ),
+                    )
                   );
                 }
             );
@@ -99,23 +117,11 @@ class _MusicBarWidget extends State<MusicBarWidget> {
         mainAxisSize: MainAxisSize.max,
         children: [
           Container(
-            margin: EdgeInsets.symmetric(vertical: 5),
-            height: MediaQuery.of(context).size.height * 0.01,
-            width: MediaQuery.of(context).size.height * 0.1,
-            decoration: BoxDecoration(
-              color: Colors.grey,
-              borderRadius: BorderRadius.all(Radius.circular(5)),
-            ),
-
-            child: GestureDetector(
-              onTap: () {Navigator.pop(context);},
-            ),
-          ),
-          Container(
             height: MediaQuery.of(context).size.height / 2 - 40,
             width: MediaQuery.of(context).size.height * 0.8 / 2,
             margin: EdgeInsets.symmetric(horizontal: 30, vertical: 30),
             color: Colors.blue.withOpacity(0.8),
+            child: Image.network(widget.audioHandler.mediaItem.value!.artUri.toString(), fit: BoxFit.cover,),
           ),
           Container(
               alignment: Alignment.bottomCenter,
@@ -132,7 +138,8 @@ class _MusicBarWidget extends State<MusicBarWidget> {
               )
           ),
           Container(
-            child: Text(widget.audioHandler.mediaItem.value!.title),
+            width: MediaQuery.of(context).size.width - 60,
+            child: Text(widget.audioHandler.mediaItem.value!.title, textAlign: TextAlign.center,),
           ),
           GestureDetector(
             onTap: () {
@@ -236,8 +243,12 @@ class _SmallPlaylistWidget extends State<SmallPlaylistWidget> {
                         children: [
                           Container(
                             decoration: BoxDecoration(
-                                color: Colors.purple[100 * (index % 9 + 1)]!,
-                                borderRadius: BorderRadius.all(Radius.circular(10))
+                              color: Colors.purple[100 * (index % 9 + 1)]!,
+                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                              image: DecorationImage(
+                                image: NetworkImage(widget.userMusic.smallPlaylist[index].image!),
+                                fit: BoxFit.cover,
+                              ),
                             ),
                             margin: EdgeInsets.symmetric(horizontal: 5),
                             padding: EdgeInsets.all(10),
@@ -249,20 +260,26 @@ class _SmallPlaylistWidget extends State<SmallPlaylistWidget> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(
-                                  widget.userMusic.smallPlaylist[index].name!.trim(),
-                                  textAlign: TextAlign.left,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(fontSize: 16),
+                                SizedBox(
+                                  width: MediaQuery.of(context).size.width - 80,
+                                  child: Text(
+                                    widget.userMusic.smallPlaylist[index].name!.trim(),
+                                    textAlign: TextAlign.left,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(fontSize: 16),
+                                  ),
                                 ),
-                                Text(
-                                  widget.userMusic.smallPlaylist[index].author!.trim(),
-                                  // textAlign: TextAlign.left,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(fontSize: 14),
-                                ),
+                                SizedBox(
+                                  width: MediaQuery.of(context).size.width - 80,
+                                  child: Text(
+                                    widget.userMusic.smallPlaylist[index].author!.trim(),
+                                    // textAlign: TextAlign.left,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(fontSize: 14),
+                                  ),
+                                )
                               ]
                           ),
                         ],

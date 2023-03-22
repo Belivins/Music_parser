@@ -24,6 +24,8 @@ class Network{
   static List<Music> music_list = [];
   String user_name = '';
   bool all_load = false;
+  int currentLoadedPage = -1;
+  late int allPages;
 
   getMusic(){
     return music_list;
@@ -102,7 +104,7 @@ class Network{
     // print(elements.last.children.last.attributes['data-page']);
     // print(elements.last.attributes['data-page']);
     var number = int.parse(elements.last.children.last.attributes['data-page']!);
-    print(number);
+    // print(number);
     return number! + 1;
   }
 
@@ -184,14 +186,17 @@ class Network{
     // music_list.forEach((i)=>i.display());
     // document.remove();
   }
+
 }
 
-Map<String, String> headers = {
-  'accept': 'text/html',
-  'accept-encoding': 'deflate, gzip',
-  'accept-language': 'ru-RU,ru;q=0.9',
-  "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
-};
+
+
+// Map<String, String> headers = {
+//   'accept': 'text/html',
+//   'accept-encoding': 'deflate, gzip',
+//   'accept-language': 'ru-RU,ru;q=0.9',
+//   "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
+// };
 
 // String local_IP = 'http://192.168.1.100:5000';
 // String url_api = '$local_IP/api?link=';

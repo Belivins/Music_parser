@@ -12,7 +12,6 @@ class MusicBottomBar extends StatefulWidget{
   final void Function(dynamic value) updateMusicList;
   final MusicBox userMusic;
 
-
   const MusicBottomBar(this.updateMusicList, {Key? key, required this.userMusic, required this.audioHandler}) : super(key: key);
 
   @override
@@ -32,6 +31,7 @@ class _MusicBottomBar extends State<MusicBottomBar> {
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Positioned(
@@ -41,89 +41,92 @@ class _MusicBottomBar extends State<MusicBottomBar> {
           StreamBuilder<QueueState>(
             stream: widget.audioHandler.queueState,
             builder: (context, snapshot) {
-              return Container(
-                decoration: BoxDecoration(
-                  color: Colors.white12.withOpacity(0.9),
-                  border: Border(
-                    top: BorderSide(
-                      color: Colors.grey.withOpacity(0.9),
-                      width: 1,
+              return Visibility(
+                visible: widget.userMusic.currentIndex == -1 ? false : true,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white12.withOpacity(0.9),
+                    border: Border(
+                      top: BorderSide(
+                        color: Colors.grey.withOpacity(0.9),
+                        width: 1,
+                      ),
                     ),
                   ),
-                ),
-                alignment: Alignment.center,
-                width: MediaQuery.of(context).size.width,
-                height: 50,
-                // height: 100,
-                child: InkWell(
-                  onTap: () {
-                    _showModalBottomSheet();
-                  },
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      StreamBuilder<PlaybackState>(
-                        stream: widget.audioHandler.playbackState,
-                        builder: (context, snapshot) {
-                          final playbackState = snapshot.data;
-                          final processingState = playbackState?.processingState;
-                          final playing = playbackState?.playing;
-                          if (processingState == AudioProcessingState.loading ||
-                              processingState == AudioProcessingState.buffering) {
-                            return Container(
-                              margin: const EdgeInsets.all(8.0),
-                              width: 32.0,
-                              height: 32.0,
-                              child: const CircularProgressIndicator(),
-                            );
-                          } else if (playing != true) {
-                            return IconButton(
-                              icon: const Icon(Icons.play_arrow),
-                              iconSize: 32.0,
-                              onPressed: widget.audioHandler.play,
-                            );
-                          } else {
-                            return IconButton(
-                              icon: const Icon(Icons.pause),
-                              iconSize: 32.0,
-                              onPressed: widget.audioHandler.pause,
-                            );
-                          }
-                        },
-                      ),
-                      StreamBuilder<QueueState>(
-                        stream: widget.audioHandler.queueState,
-                        builder: (context, snapshot) {
-                          return SizedBox(
-                            height: 50,
-                            width: MediaQuery.of(context).size.width - 96,
-                            child: OverflowBox(
-                              maxHeight: 50,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(widget.audioHandler.mediaItem.value?.title ?? 'Not found', overflow: TextOverflow.visible, style: TextStyle(fontSize: 14), textAlign: TextAlign.center,),
-                                  Text(widget.audioHandler.mediaItem.value?.artist ?? 'Not found', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12)),
-                                ],
-                              ),
-                            )
-                          );
-                        },
-                      ),
-                      IconButton(
-                          onPressed:() {
-                            setState(() {
-                              widget.audioHandler.stop();
-                              widget.audioHandler.seek(Duration.zero);
-                              widget.userMusic.currentIndex = -1;
-                            });
+                  alignment: Alignment.center,
+                  width: MediaQuery.of(context).size.width,
+                  height: 50,
+                  // height: 100,
+                  child: InkWell(
+                    onTap: () {
+                      _showModalBottomSheet();
+                    },
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        StreamBuilder<PlaybackState>(
+                          stream: widget.audioHandler.playbackState,
+                          builder: (context, snapshot) {
+                            final playbackState = snapshot.data;
+                            final processingState = playbackState?.processingState;
+                            final playing = playbackState?.playing;
+                            if (processingState == AudioProcessingState.loading ||
+                                processingState == AudioProcessingState.buffering) {
+                              return Container(
+                                margin: const EdgeInsets.all(8.0),
+                                width: 32.0,
+                                height: 32.0,
+                                child: const CircularProgressIndicator(),
+                              );
+                            } else if (playing != true) {
+                              return IconButton(
+                                icon: const Icon(Icons.play_arrow),
+                                iconSize: 32.0,
+                                onPressed: widget.audioHandler.play,
+                              );
+                            } else {
+                              return IconButton(
+                                icon: const Icon(Icons.pause),
+                                iconSize: 32.0,
+                                onPressed: widget.audioHandler.pause,
+                              );
+                            }
                           },
-                          iconSize: 32.0,
-                          icon: Icon(Icons.close)
-                      ),
-                    ],
+                        ),
+                        StreamBuilder<QueueState>(
+                          stream: widget.audioHandler.queueState,
+                          builder: (context, snapshot) {
+                            return SizedBox(
+                              height: 50,
+                              width: MediaQuery.of(context).size.width - 96,
+                              child: OverflowBox(
+                                maxHeight: 50,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(widget.audioHandler.mediaItem.value?.title ?? 'Not found', overflow: TextOverflow.visible, style: TextStyle(fontSize: 14), textAlign: TextAlign.center,),
+                                    Text(widget.audioHandler.mediaItem.value?.artist ?? 'Not found', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12)),
+                                  ],
+                                ),
+                              )
+                            );
+                          },
+                        ),
+                        IconButton(
+                            onPressed:() {
+                              setState(() {
+                                widget.audioHandler.stop();
+                                widget.audioHandler.seek(Duration.zero);
+                                widget.userMusic.currentIndex = -1;
+                              });
+                            },
+                            iconSize: 32.0,
+                            icon: Icon(Icons.close)
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+                )
               );
             },
           ),

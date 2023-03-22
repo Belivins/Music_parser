@@ -4,7 +4,7 @@ import 'package:test_projects/Network/MusicBox.dart';
 import 'package:test_projects/Network/network.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
-import 'package:test_projects/Widgets/MusicBar/CustomMusicBottomBar.dart';
+import 'package:test_projects/Widgets/MusicBar/MusicBottomBar.dart';
 import 'package:test_projects/main.dart';
 
 class MusicScreen extends StatefulWidget{
@@ -77,9 +77,10 @@ class _MusicScreen extends State<MusicScreen>{
     await widget.audioHandler.play();
   }
 
-
   @override
   Widget build(BuildContext context) {
+
+
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -140,8 +141,12 @@ class _MusicScreen extends State<MusicScreen>{
                               Container(
                                   alignment: Alignment.center,
                                   decoration: BoxDecoration(
-                                      color: Colors.purple[100 * (index % 9 + 1)]!,
-                                      borderRadius: BorderRadius.all(Radius.circular(10))
+                                    // color: Colors.purple[100 * (index % 9 + 1)]!,
+                                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                                    image: DecorationImage(
+                                      image: NetworkImage(widget.userMusic.findMusic[index].image!),
+                                      fit: BoxFit.cover,
+                                    ),
                                   ),
                                   margin: EdgeInsets.symmetric(horizontal: 5),
                                   // padding: EdgeInsets.all(10),
@@ -155,7 +160,7 @@ class _MusicScreen extends State<MusicScreen>{
                                       final playing = playbackState?.playing;
                                       if ((processingState == AudioProcessingState.loading ||
                                           processingState == AudioProcessingState.buffering) &&
-                                          (widget.userMusic.findMusic[index].name == widget.audioHandler.mediaItem.value!.title ||
+                                          (widget.userMusic.findMusic[index].name == widget.audioHandler.mediaItem.value!.title &&
                                               widget.userMusic.findMusic[index].author == widget.audioHandler.mediaItem.value!.artist)){
                                         return Container(
                                           // margin: const EdgeInsets.all(8.0),
@@ -164,22 +169,24 @@ class _MusicScreen extends State<MusicScreen>{
                                           child: const CircularProgressIndicator(color: Colors.white70,),
                                         );
                                       } else if (playing == true &&
-                                          (widget.userMusic.findMusic[index].name == widget.audioHandler.mediaItem.value!.title ||
+                                          (widget.userMusic.findMusic[index].name == widget.audioHandler.mediaItem.value!.title &&
                                               widget.userMusic.findMusic[index].author == widget.audioHandler.mediaItem.value!.artist)) {
                                         return Container(
-                                            width: 30.0,
-                                            height: 30.0,
+                                            // width: 45.0,
+                                            // height: 45.0,
                                             alignment: Alignment.center,
-                                            child: Icon(Icons.pause, size: 30, color: Colors.white70,)
+                                            child: Icon(Icons.pause, size: 45, color: Colors.white70,)
                                         );
                                       } else if (index == widget.userMusic.currentIndex) {
-                                        return Icon(Icons.play_arrow, size: 30.0, color: Colors.white70,);
+                                        return Icon(Icons.play_arrow, size: 45.0, color: Colors.white70,);
                                       }
                                       else return Container();
                                     },
                                   )
                                 // child: Icon(Icons.music_video_sharp, color: Colors.black,),
                               ),
+
+
                               SizedBox(
                                 width: MediaQuery.of(context).size.width - 70,
                                 child: Column(
@@ -214,7 +221,7 @@ class _MusicScreen extends State<MusicScreen>{
           ],
         ),
           // MusicSilverList(audioHandler),
-          MusicBottomBar(myVoidCallback, userMusic: widget.userMusic, audioHandler: widget.audioHandler,),
+          MusicBottomBar(myVoidCallback, userMusic: widget.userMusic, audioHandler: widget.audioHandler),
         ],
       ),
     );
