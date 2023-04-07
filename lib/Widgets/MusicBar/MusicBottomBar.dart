@@ -3,6 +3,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:test_projects/Music/AudioHandler.dart';
 import 'package:test_projects/Network/MusicBox.dart';
+import 'package:test_projects/Pages/AlbumsScreen.dart';
+import 'package:test_projects/Pages/MusicScreen.dart';
+import 'package:test_projects/Widgets/Animation/Routes/SlideRightRoute.dart';
 import 'package:test_projects/Widgets/MusicBar/ShowModalBottomSheet.dart';
 import 'package:test_projects/main.dart';
 
@@ -10,9 +13,10 @@ class MusicBottomBar extends StatefulWidget{
 
   final AudioPlayerHandler audioHandler;
   final void Function(dynamic value) updateMusicList;
+  // final void Function(dynamic value) updateSmallPlaylist;
   final MusicBox userMusic;
 
-  const MusicBottomBar(this.updateMusicList, {Key? key, required this.userMusic, required this.audioHandler}) : super(key: key);
+  const MusicBottomBar({Key? key, required this.userMusic, required this.audioHandler, required this.updateMusicList}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _MusicBottomBar();
@@ -30,7 +34,6 @@ class _MusicBottomBar extends State<MusicBottomBar> {
         }
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -104,8 +107,8 @@ class _MusicBottomBar extends State<MusicBottomBar> {
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text(widget.audioHandler.mediaItem.value?.title ?? 'Not found', overflow: TextOverflow.visible, style: TextStyle(fontSize: 14), textAlign: TextAlign.center,),
-                                    Text(widget.audioHandler.mediaItem.value?.artist ?? 'Not found', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12)),
+                                    Text(widget.audioHandler.mediaItem.value?.title ?? 'Not found', overflow: TextOverflow.visible, style: const TextStyle(fontSize: 14), textAlign: TextAlign.center,),
+                                    Text(widget.audioHandler.mediaItem.value?.artist ?? 'Not found', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
                                   ],
                                 ),
                               )
@@ -121,7 +124,7 @@ class _MusicBottomBar extends State<MusicBottomBar> {
                               });
                             },
                             iconSize: 32.0,
-                            icon: Icon(Icons.close)
+                            icon: const Icon(Icons.close)
                         ),
                       ],
                     ),
@@ -137,7 +140,7 @@ class _MusicBottomBar extends State<MusicBottomBar> {
               gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  stops: [0, 0.1, 0.9, 1],
+                  stops: const [0, 0.1, 0.9, 1],
                   colors: [
                     Colors.grey.withOpacity(1),
                     Colors.white10.withOpacity(1),
@@ -156,7 +159,9 @@ class _MusicBottomBar extends State<MusicBottomBar> {
                     onTap: () {
                       if (CurrentPage != 1) {
                         CurrentPage = 1;
-                        Navigator.pushReplacementNamed(context, "audio list");
+                        // Navigator.pushReplacementNamed(context, "audio list");
+                        // Navigator.popAndPushNamed(context, "audio list");
+                        Navigator.push(context, SlideRightRoute(page: MusicScreen(audioHandler: widget.audioHandler, userMusic: widget.userMusic, fromSavedMusic: true,), dx: -1));
                       }
                     },
                     child: Icon(Icons.queue_music,)
@@ -169,10 +174,12 @@ class _MusicBottomBar extends State<MusicBottomBar> {
                     onTap: (){
                       if (CurrentPage != 2) {
                         CurrentPage = 2;
-                        Navigator.pushReplacementNamed(context, "albums list");
+                        // Navigator.pushReplacementNamed(context, "albums list");
+                        // Navigator.popAndPushNamed(context, "albums list");
+                        Navigator.push(context, SlideRightRoute(page: AlbumScreen(audioHandler: widget.audioHandler, userMusic: widget.userMusic,), dx: 1));
                       }
                     },
-                    child: Icon(Icons.library_music_rounded),
+                    child: const Icon(Icons.library_music_rounded),
                   ),
                 )
               ],

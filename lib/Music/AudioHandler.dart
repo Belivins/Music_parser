@@ -4,7 +4,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:rxdart/subjects.dart';
 import 'package:test_projects/main.dart';
-import 'package:test_projects/Network/network.dart';
+import 'package:test_projects/Widgets/Old/network.dart';
 
 class QueueState {
   static const QueueState empty =

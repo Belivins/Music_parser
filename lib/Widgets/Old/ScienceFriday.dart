@@ -34,7 +34,7 @@ class ScienceFriday{
       allPages = int.parse(document.getElementsByClassName('wp-pagenavi').last.children.last.attributes['href']!.replaceAll('?sf_paged=', ''));
       currentLoadedPage = 1;
       // getInfoFromPage(document);
-      await getPagesSciFriday(currentLoadedPage, 5);
+      await getPagesSciFriday(currentLoadedPage, 15);
     }
     catch (e) {
       return 'Долгое ожидание ответа от сервера';

@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
       // home: const MainScreen(),
       home: FirstPage(audioHandler: _audioHandler, userMusic: userMusic,),
       routes: {
-        "audio list":(context)=>MusicScreen(audioHandler: _audioHandler, userMusic: userMusic,),
+        "audio list":(context)=>MusicScreen(audioHandler: _audioHandler, userMusic: userMusic, fromSavedMusic: true),
         "albums list":(context)=>AlbumScreen(audioHandler: _audioHandler, userMusic: userMusic,),
       },
     );
