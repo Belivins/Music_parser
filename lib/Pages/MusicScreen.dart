@@ -1,6 +1,7 @@
 import 'package:just_audio/just_audio.dart';
 import 'package:test_projects/Music/AudioHandler.dart';
 import 'package:test_projects/Network/MusicBox.dart';
+import 'package:test_projects/Pages/FirstPage.dart';
 import 'package:test_projects/Widgets/Old/network.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +28,7 @@ class _MusicScreen extends State<MusicScreen>{
   List<MediaItem> newMediaList = [];
 
   Load_more()  async {
-    while (true){
+    while (true && mounted){
       List<MediaItem> moreMedia = await widget.userMusic.pumpage();
       if(moreMedia.isNotEmpty){
         print(widget.userMusic.mediaList.length);
@@ -120,44 +121,28 @@ class _MusicScreen extends State<MusicScreen>{
                   floating: true,
                   backgroundColor: Colors.white,
                   actions: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          height: 56,
-                          width: 50,
-                          child: InkWell(
-                            onTap: (){},
-                            child: const Icon(Icons.account_circle,color: Colors.black,),
+                    SizedBox(
+                      height: 56,
+                      width: MediaQuery.of(context).size.width,
+                      child: TextField(
+                        controller: textController,
+                        onChanged: (value) => _runFilter(value),
+                        decoration: InputDecoration(
+                          labelText: widget.userMusic.currentUser.userName,
+                          suffixIcon: const Icon(Icons.search),
+                          prefixIcon: IconButton(
+                            icon: const Icon(
+                              Icons.account_circle,
+                              color: Colors.black,
+                              // size: 50.0,
+                            ),
+                            onPressed: (){
+                              Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => FirstPage(audioHandler: widget.audioHandler, userMusic: widget.userMusic)));
+                            },
                           ),
                         ),
-                        Container(
-                          height: 56,
-                          width: MediaQuery.of(context).size.width - 50,
-                          child: TextField(
-                            controller: textController,
-                            onChanged: (value) => _runFilter(value),
-                            decoration: InputDecoration(
-                              labelText: widget.userMusic.user_name,
-                              suffixIcon: const Icon(Icons.search),
-
-                              // suffixIcon: textController.text.isEmpty ? const Icon(Icons.search)
-                              //     : IconButton(icon: const Icon(Icons.clear, color: Colors.red,), onPressed: () async {
-                              //         textController.clear();
-                              //         widget.userMusic.findMusic = widget.userMusic.allMusic;
-                              //         newMediaList = await widget.userMusic.fillMediaList(widget.userMusic.findMusic);
-                              //       },
-                              // ) ,
-
-                              // prefixIcon: Icon(
-                              //   Icons.account_box,
-                              //   size: 28.0,
-                              // ),
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
+                      ),
+                    )
                   ],
                 ),
                 SliverList(
@@ -172,8 +157,7 @@ class _MusicScreen extends State<MusicScreen>{
                             final playbackState = snapshot.data;
                             final processingState = playbackState?.processingState;
                             final playing = playbackState?.playing;
-                            if (widget.audioHandler.mediaItem.value?.id == widget.userMusic.findMusic[index].link
-                                && widget.userMusic.currentIndex == index){
+                            if (widget.audioHandler.mediaItem.value?.id == widget.userMusic.findMusic[index].link){
                               if (processingState == AudioProcessingState.loading ||
                                   processingState == AudioProcessingState.buffering) {
                                 ImageContainer = Container(
@@ -199,8 +183,7 @@ class _MusicScreen extends State<MusicScreen>{
 
                             return Container(
                                 margin: index == widget.userMusic.findMusic.length-1 ? (widget.userMusic.currentIndex != -1 ? const EdgeInsets.only(bottom: 100) : const EdgeInsets.only(bottom: 50)) : const EdgeInsets.only(bottom: 0),
-                                color: (widget.audioHandler.mediaItem.value?.id == widget.userMusic.findMusic[index].link
-                                    && widget.userMusic.currentIndex == index) ? Colors.grey.shade300 : Colors.white,
+                                color: (widget.audioHandler.mediaItem.value?.id == widget.userMusic.findMusic[index].link) ? Colors.grey.shade300 : Colors.white,
                                 height: 60,
                                 alignment: Alignment.centerLeft,
                                 child:

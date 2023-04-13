@@ -43,14 +43,14 @@ class Music{
   static Future<File> writeFile(String nameFile, String data) async {
     final path = await _localPath;
     print(path);
-    final file =  File('$path/$nameFile');
+    final file =  File('$path/$nameFile.json');
     return file.writeAsString(data);
   }
 
   static Future<String> readFile(String nameFile) async {
     final path = await _localPath;
     try {
-      final file =  File('$path/$nameFile');
+      final file =  File('$path/$nameFile.json');
       final contents = await file.readAsString();
       return contents;
     } catch (e) {
