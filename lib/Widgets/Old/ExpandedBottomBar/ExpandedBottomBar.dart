@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:test_projects/Widgets/ExpandedBottomBar/ExpandedBottomBarController.dart';
+import 'package:test_projects/Widgets/Old/ExpandedBottomBar/ExpandedBottomBarController.dart';
 
 /// An enum representing different sides of a screen
 enum Side { Top, Bottom }
