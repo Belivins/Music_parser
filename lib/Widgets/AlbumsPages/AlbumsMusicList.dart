@@ -8,9 +8,9 @@ class AlbumMusicList extends StatefulWidget{
 
   final AudioPlayerHandler audioHandler;
   final MusicBox userMusic;
-  final int startIndex;
+  final int albumIndex;
 
-  const AlbumMusicList({Key? key, required this.userMusic, required this.audioHandler, required this.startIndex}) : super(key: key);
+  const AlbumMusicList({Key? key, required this.userMusic, required this.audioHandler, required this.albumIndex}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _AlbumMusicList();
@@ -62,7 +62,7 @@ class _AlbumMusicList extends State<AlbumMusicList>{
                     Navigator.pop(context);
                   }
                 ),
-                expandedHeight: MediaQuery.of(context).size.height/3,
+                expandedHeight: MediaQuery.of(context).size.height/5*2,
                 // expandedHeight: 220.0,
                 // floating: true,
                 pinned: true,
@@ -81,7 +81,7 @@ class _AlbumMusicList extends State<AlbumMusicList>{
                       width: MediaQuery.of(context).size.width,
                       child: TextField(
                         decoration: InputDecoration(
-                          labelText: widget.userMusic.user_name,
+                          labelText: widget.userMusic.currentUser.userName,
                           suffixIcon: const Icon(Icons.search),
                         ),
                       ),
@@ -93,13 +93,15 @@ class _AlbumMusicList extends State<AlbumMusicList>{
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Container(
-                          width: MediaQuery.of(context).size.width - MediaQuery.of(context).size.width/4,
-                          height: MediaQuery.of(context).size.height/5,
+                          // width: MediaQuery.of(context).size.width - MediaQuery.of(context).size.width/4,
+                          width: MediaQuery.of(context).size.width/2,
+                          height: MediaQuery.of(context).size.height/4,
                           decoration: BoxDecoration(
                             // color: Colors.purple[100 * (index % 9 + 1)]!,
                             borderRadius: const BorderRadius.all(Radius.circular(30)),
                             image: DecorationImage(
-                              image: NetworkImage(widget.userMusic.allMusic[widget.startIndex].image!),
+                              // image: NetworkImage(widget.userMusic.allMusic[widget.startIndex].image!),
+                              image: NetworkImage(widget.userMusic.allAlbums[widget.albumIndex].image!),
                               fit: BoxFit.cover,
                             ),
                             boxShadow: null,
@@ -107,12 +109,12 @@ class _AlbumMusicList extends State<AlbumMusicList>{
                         ),
                         SizedBox(
                           width: MediaQuery.of(context).size.width - MediaQuery.of(context).size.width/4,
-                          height: MediaQuery.of(context).size.height/15,
+                          height: MediaQuery.of(context).size.height/14,
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              Text(widget.userMusic.allMusic[widget.startIndex].name!, style: TextStyle(fontSize: 16), textAlign: TextAlign.center,),
-                              Text(widget.userMusic.allMusic[widget.startIndex].author!, style: TextStyle(fontSize: 14), textAlign: TextAlign.center,),
+                              Text(widget.userMusic.allAlbums[widget.albumIndex].title!, style: TextStyle(fontSize: 16), textAlign: TextAlign.center,),
+                              Text(widget.userMusic.allAlbums[widget.albumIndex].artist!, style: TextStyle(fontSize: 14), textAlign: TextAlign.center,),
                             ],
                           )
                         ),
@@ -170,9 +172,10 @@ class _AlbumMusicList extends State<AlbumMusicList>{
                   ),
                 ),
               ),
+
               SliverList(
                 delegate: SliverChildBuilderDelegate(
-                  childCount: 20,
+                  childCount: widget.userMusic.allAlbums[widget.albumIndex].musics!.length,
                       (BuildContext context, int index) {
                     return Container(
                         margin: index == 20 - 1 ? const EdgeInsets.only(bottom: 48) : const EdgeInsets.only(bottom: 0),
@@ -192,7 +195,7 @@ class _AlbumMusicList extends State<AlbumMusicList>{
                                     // color: Colors.purple[100 * (index % 9 + 1)]!,
                                     borderRadius: const BorderRadius.all(Radius.circular(10)),
                                     image: DecorationImage(
-                                      image: NetworkImage(widget.userMusic.findMusic[widget.startIndex + index].image!),
+                                      image: NetworkImage(widget.userMusic.allAlbums[widget.albumIndex].musics![index].image!),
                                       fit: BoxFit.cover,
                                     ),
                                   ),
@@ -208,21 +211,21 @@ class _AlbumMusicList extends State<AlbumMusicList>{
                                       final playing = playbackState?.playing;
                                       if ((processingState == AudioProcessingState.loading ||
                                           processingState == AudioProcessingState.buffering) &&
-                                          (widget.userMusic.findMusic[widget.startIndex + index].name == widget.audioHandler.mediaItem.value!.title &&
-                                              widget.userMusic.findMusic[widget.startIndex + index].author == widget.audioHandler.mediaItem.value!.artist)){
+                                          (widget.userMusic.allAlbums[widget.albumIndex].musics![index].name == widget.audioHandler.mediaItem.value!.title &&
+                                              widget.userMusic.allAlbums[widget.albumIndex].musics![index].author == widget.audioHandler.mediaItem.value!.artist)){
                                         return Container(
                                           width: 30.0,
                                           height: 30.0,
                                           child: const CircularProgressIndicator(color: Colors.white70,),
                                         );
                                       } else if (playing == true &&
-                                          (widget.userMusic.findMusic[widget.startIndex + index].name == widget.audioHandler.mediaItem.value!.title &&
-                                              widget.userMusic.findMusic[widget.startIndex + index].author == widget.audioHandler.mediaItem.value!.artist)) {
+                                          (widget.userMusic.allAlbums[widget.albumIndex].musics![index].name == widget.audioHandler.mediaItem.value!.title &&
+                                              widget.userMusic.allAlbums[widget.albumIndex].musics![index].author == widget.audioHandler.mediaItem.value!.artist)) {
                                         return Container(
                                             alignment: Alignment.center,
                                             child: const Icon(Icons.pause, size: 45, color: Colors.white70,)
                                         );
-                                      } else if (widget.startIndex + index == widget.userMusic.currentIndex) {
+                                      } else if (widget.albumIndex + index == widget.userMusic.currentIndex) {
                                         return const Icon(Icons.play_arrow, size: 45.0, color: Colors.white70,);
                                       }
                                       else return Container();
@@ -236,14 +239,14 @@ class _AlbumMusicList extends State<AlbumMusicList>{
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
-                                        widget.userMusic.findMusic[widget.startIndex + index].name!.trim(),
+                                        widget.userMusic.allAlbums[widget.albumIndex].musics![index].name!.trim(),
                                         textAlign: TextAlign.left,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(fontSize: 18),
                                       ),
                                       Text(
-                                        widget.userMusic.findMusic[widget.startIndex + index].author!,
+                                        widget.userMusic.allAlbums[widget.albumIndex].musics![index].author!,
                                         // textAlign: TextAlign.left,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
@@ -255,23 +258,6 @@ class _AlbumMusicList extends State<AlbumMusicList>{
                             ],
                           ),
                         )
-                    );
-                    return Container(
-                      margin: index == 20-1 ? const EdgeInsets.only(bottom: 55) : const EdgeInsets.only(bottom: 5),
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: Colors.purple[100 * (index % 9 + 1)]!,
-                        borderRadius: const BorderRadius.all(Radius.circular(30)),
-                        // image: DecorationImage(
-                        //   image: NetworkImage(widget.userMusic.findMusic[index].image!),
-                        //   fit: BoxFit.cover,
-                        // ),
-                      ),
-                      child: InkWell(
-                        onTap: (){
-                          // Navigator.push(context, ScaleRoute(page: AlbumMusicList(audioHandler: widget.audioHandler, userMusic: widget.userMusic)));
-                        },
-                      ),
                     );
                   },
                 ),

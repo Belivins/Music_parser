@@ -5,7 +5,9 @@ import 'package:html/parser.dart' as parser;
 import 'package:http/http.dart' as http;
 import 'package:crypto/crypto.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:test_projects/Music/Albums.dart';
 import 'package:test_projects/Music/music.dart';
+import 'package:test_projects/Network/Users.dart';
 // import 'package:test_projects/Widgets/Old/ScienceFriday.dart';
 import 'package:test_projects/Network/VKstream.dart';
 // import 'package:test_projects/Network/network.dart';
@@ -15,17 +17,23 @@ class MusicBox {
   VKstream vk_stream = VKstream();
 
   // Network network = Network();
+  List<Album> allAlbums = [];
   List<Music> allMusic = [];
   List<Music> findMusic = [];
   List<MediaItem> mediaList = [];
   List<Music> smallPlaylist = [];
   int currentIndex = -1;
-  String user_name = '';
+  late User currentUser;
 
-  MusicBox() {}
+  // MusicBox() {}
+
+  getUser(String userName) async {
+    currentUser = await vk_stream.getUserInfo(userName);
+    return currentUser;
+  }
 
   saveMusicBox(){
-    Music.writeFile(user_name, Music.encodeMusics(allMusic));
+    Music.writeFile(currentUser.userID!, Music.encodeMusics(allMusic));
   }
 
   fillMediaList(newMusicList){
@@ -45,33 +53,50 @@ class MusicBox {
   }
 
   loadMusicBox(String userName) async {
-    user_name = userName;
     await addMusicList(Music.decodeMusics(await Music.readFile(userName)));
     print('load_start');
     mediaList.addAll(fillMediaList(allMusic));
     return mediaList;
   }
 
-  saveUser() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final List<String>? users = prefs.getStringList('users');
-    if (users != null){
-      if(!users.contains(user_name)) {
-        users.insert(0, user_name);
-        await prefs.setStringList('users', users);
-      }
-    }
-    else{
-      await prefs.setStringList('users', <String>[user_name]);
-    }
-    print('saved user');
-    saveMusicBox();
-  }
+  // saveUser() async {
+  //   final SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   final List<String>? users = prefs.getStringList('users');
+  //   if (users != null){
+  //     if(!users.contains(user_name)) {
+  //       users.insert(0, user_name);
+  //       await prefs.setStringList('users', users);
+  //     }
+  //   }
+  //   else{
+  //     await prefs.setStringList('users', <String>[user_name]);
+  //   }
+  //   print('saved user');
+  //   saveMusicBox();
+  // }
 
   addMusicList(List<Music> newMusic) {
     allMusic.addAll(newMusic);
     findMusic.addAll(newMusic);
     smallPlaylist = List.from(findMusic);
+  }
+
+  getMusicFromAlbum() async{
+    for (final album in allAlbums){
+      album.musics = await vk_stream.getAlbumsMusic(album.id, album.owner_id, album.access_hash);
+      print(album.title);
+    }
+    print('loaded music album');
+  }
+
+  getAlbums(String vk_link) async {
+    allAlbums = await vk_stream.getUserAlbums(vk_link);
+    if(allAlbums.isEmpty) {
+      print('нет альбомов');
+      // return <MediaItem>[];
+    }
+    ///////////////////////////////
+
   }
 
   pumpage() async {
@@ -88,14 +113,13 @@ class MusicBox {
   }
 
   newGetMusic(String vk_link) async{
-    user_name = vk_link;
     List<Music> newMusic = await vk_stream.getVKstream(vk_link);
     if(newMusic.isEmpty) {
       // print('null music - - vk_stream pumpage');
       return 'Ошибка подключения к серверу музыки';
     }
     await addMusicList(newMusic);
-    saveUser();
+    // saveUser();
     mediaList = fillMediaList(newMusic);
     // for(final music in newMusic){
     //   mediaList.add(

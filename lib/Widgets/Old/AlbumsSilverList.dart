@@ -46,7 +46,7 @@ class _AlbumsSilverList extends State<AlbumsSilverList> {
                     // controller: textController,
                     // onChanged: (value) => _runFilter(value),
                     decoration: InputDecoration(
-                      labelText: widget.userMusic.user_name,
+                      labelText: widget.userMusic.currentUser.userName,
                       suffixIcon: const Icon(Icons.search),
                     ),
                   ),
